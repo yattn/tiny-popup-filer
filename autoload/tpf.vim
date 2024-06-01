@@ -55,7 +55,7 @@ def Filter(ctx: dict<any>, id: number, key: string): bool
         if isdirectory(ctx.curdir .. ctx.files[ctx.idx])
             return Edit(id, 'cd', ctx.curdir .. ctx.files[ctx.idx])
         else
-            echoerr ctx.files[ctx.idx] .. " is not directory"
+            echo ctx.files[ctx.idx] .. " is not directory"
         endif
     endif
 
