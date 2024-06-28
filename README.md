@@ -9,6 +9,7 @@
 - ポップアップウィンドウ
 
 ## 感謝
-以下のリポジトリを参考にさせていただきました。  
+以下のリポジトリと記事を参考にさせていただきました。  
 https://github.com/mattn/vim-molder  
 https://github.com/skanehira/popupfiles.vim  
+https://qiita.com/gorilla0513/items/fa4b401e7264a31868b9
