@@ -7,3 +7,8 @@
 - ファイルを開く
 - カレントディレクトリの移動
 - ポップアップウィンドウ
+
+# 感謝
+以下のリポジトリを参考にさせていただきました。
+https://github.com/mattn/vim-molder
+https://github.com/skanehira/popupfiles.vim
