@@ -6,4 +6,4 @@ vim9script
 
 g:loaded_tpf = true
 
-import autoload '../autoload/command.vim'
+import autoload '../autoload/tpf.vim'
