@@ -7,3 +7,4 @@ vim9script
 g:loaded_tpf = true
 
 import autoload '../autoload/tpf.vim'
+command! -nargs=? -bar Tpf call tpf#Open(<f-args>)
