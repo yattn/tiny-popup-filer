@@ -65,6 +65,7 @@ def Filter(ctx: dict<any>, id: number, key: string): bool
         if empty(ctx.files)
             return Up(ctx, id)
         elseif !isdirectory(ctx.curdir .. ctx.files[ctx.idx])
+            prevdir = ctx.curdir
             return Edit(id, 'e', ctx.curdir .. ctx.files[ctx.idx])
         else
             return Down(ctx, id)
@@ -109,14 +110,14 @@ export def Open(curpath = ''): void
         'curdir': ''
     }
 
-    if curpath ==# '' && prevdir !=# '.'
-        curpath = prevdir
+    if curpath !=# ''
+        prevdir = curpath
     endif
 
     popup_min_width = (&columns / 2)
     popup_max_height = (&lines / 2)
 
-    var path = expand(curpath)
+    var path = expand(prevdir)
     var dir = fnamemodify(path, ':p:gs!\/!')
     if isdirectory(dir) && dir !~# '/$'
         dir ..= '/'
