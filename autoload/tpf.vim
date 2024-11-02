@@ -2,6 +2,7 @@ vim9script
 
 var popup_min_width = 0
 var popup_max_height = 0
+var prevdir = '.'
 
 def Name(base: string, v: dict<any>): string
     var type = v['type']
@@ -100,13 +101,17 @@ def Edit(id: number, open: string, filepath: string): bool
     return 1
 enddef
 
-export def Open(curpath = '.'): void
+export def Open(curpath = ''): void
 
     var ctx = {
         'idx': 0,
         'files': [],
         'curdir': ''
     }
+
+    if curpath ==# '' && prevdir !=# '.'
+        curpath = prevdir
+    endif
 
     popup_min_width = (&columns / 2)
     popup_max_height = (&lines / 2)
