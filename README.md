@@ -1,15 +1,36 @@
-# Vim9 script で作られた最小限のファイラ
-## いらない
-- ファイル操作
-- ツリー表示
-- 新規バッファ
-## いる
-- ファイルを開く
-- カレントディレクトリの移動
-- ポップアップウィンドウ
+# tiny-popup-filer
 
-## 感謝
-以下のリポジトリと記事を参考にさせていただきました。  
-https://github.com/mattn/vim-molder  
-https://github.com/skanehira/popupfiles.vim  
-https://qiita.com/gorilla0513/items/fa4b401e7264a31868b9
+最小限・シンプルな Vim9 script 製のファイラー。
+**ファイル操作もツリー表示も新規バッファも不要**
+「開くだけ」のポップアップ型ファイラー。
+
+---
+
+## 特徴
+
+* Vim9 script で実装された軽量ファイラー
+* ポップアップウィンドウにファイル一覧を表示
+* カーソル操作でファイル選択 → 開く
+* カレントディレクトリの移動も対応
+* 新しいバッファを開かないで既存ウィンドウで開く
+
+## 要らないもの
+
+* 新しいバッファの作成
+* ファイルのコピー／削除／移動などの操作
+* 複雑なツリー表示
+
+---
+
+## 🙏 感謝・参考
+
+このプラグインは以下の素晴らしいプロジェクトを参考にしています：
+
+* [https://github.com/mattn/vim-molder](https://github.com/mattn/vim-molder)
+* [https://github.com/skanehira/popupfiles.vim](https://github.com/skanehira/popupfiles.vim)
+
+---
+
+## ライセンス
+
+MIT License
