@@ -4,8 +4,6 @@
 **ファイル操作もツリー表示も新規バッファも不要**
 「開くだけ」のポップアップ型ファイラー。
 
----
-
 ## 特徴
 
 * Vim9 script で実装された軽量ファイラー
@@ -20,16 +18,12 @@
 * ファイルのコピー／削除／移動などの操作
 * 複雑なツリー表示
 
----
-
 ## 🙏 感謝・参考
 
 このプラグインは以下の素晴らしいプロジェクトを参考にしています：
 
 * [https://github.com/mattn/vim-molder](https://github.com/mattn/vim-molder)
 * [https://github.com/skanehira/popupfiles.vim](https://github.com/skanehira/popupfiles.vim)
-
----
 
 ## ライセンス
 
