@@ -1,7 +1,5 @@
 vim9script
 
-var popup_min_width = 0
-var popup_max_height = 0
 var prevdir = '.'
 
 def Name(base: string, v: dict<any>): string
@@ -16,120 +14,101 @@ def Name(base: string, v: dict<any>): string
     return v['name'] .. (type ==# 'dir' ? '/' : '')
 enddef
 
-def Down(ctx: dict<any>, id: number): bool
-    popup_close(id)
-    ctx.curdir ..= ctx.files[ctx.idx]
-    var dir = ctx.files[ctx.idx] .. '/'
-    ctx.files = map(readdirex(ctx.curdir, '1', {'sort': 'collate'}), (_, v): string => Name(dir, v))
-    ctx.idx = 0
+def Show(ctx: dict<any>): void
+    ctx.files = map(readdirex(ctx.curdir, '1', {'sort': 'collate'}), (_, v): string => Name(ctx.curdir, v))
     popup_menu(ctx.files, {
         'filter': funcref('Filter', [ctx]),
+        'callback': funcref('OnSelect', [ctx]),
         'scrollbar': 0,
-        'minwidth': popup_min_width,
-        'maxheight': popup_max_height
+        'minwidth': &columns / 2,
+        'maxheight': &lines / 2
     })
-    return 1
+enddef
+
+def Descend(ctx: dict<any>, name: string): void
+    ctx.curdir ..= name
+    Show(ctx)
 enddef
 
 def Up(ctx: dict<any>, id: number): bool
     popup_close(id)
-    ctx.curdir = substitute(ctx.curdir, '/$', '', '')
-    ctx.curdir = fnamemodify(ctx.curdir, ':p:h:h:gs!\/!') .. '/'
-    ctx.files = map(readdirex(ctx.curdir, '1', {'sort': 'collate'}), (_, v): string => Name(ctx.curdir, v))
-    ctx.idx = 0
-    popup_menu(ctx.files, {
-        'filter': funcref('Filter', [ctx]),
-        'scrollbar': 0,
-        'minwidth': popup_min_width,
-        'maxheight': popup_max_height
-    })
-    return 1
+    var dir = substitute(ctx.curdir, '/\+$', '', '')
+    if dir !=# ''
+        var parent = fnamemodify(dir, ':h')
+        ctx.curdir = parent ==# '/' ? '/' : parent .. '/'
+    endif
+    Show(ctx)
+    return true
+enddef
+
+# 選択位置は popup のハイライトだけを見て、ctx 側では持たない。
+# 二重管理すると popup_filter_menu の操作 (C-N/C-P/Space/マウス等) とずれるため。
+def Selected(ctx: dict<any>, id: number): string
+    if empty(ctx.files)
+        return ''
+    endif
+    var idx = line('.', id) - 1
+    if idx < 0 || idx >= len(ctx.files)
+        return ''
+    endif
+    return ctx.files[idx]
 enddef
 
 def Filter(ctx: dict<any>, id: number, key: string): bool
-
-    if key ==# "\<left>" || key ==# "h" || key ==# "-"
+    if key ==# "\<left>" || key ==# 'h' || key ==# '-'
         return Up(ctx, id)
     endif
 
-    if key ==# "c"
-        if isdirectory(ctx.curdir .. ctx.files[ctx.idx])
-            execute "cd" ctx.curdir .. ctx.files[ctx.idx]
-            echo "cd " .. ctx.curdir .. ctx.files[ctx.idx]
-        else
-            echo ctx.files[ctx.idx] .. " is not directory"
+    if key ==# "\<cr>" && empty(ctx.files)
+        return Up(ctx, id)
+    endif
+
+    if key ==# "\<right>" || key ==# 'l'
+        var name = Selected(ctx, id)
+        if name !=# '' && isdirectory(ctx.curdir .. name)
+            popup_close(id)
+            Descend(ctx, name)
+            return true
         endif
     endif
 
-    if key ==# "\<cr>"
-        if empty(ctx.files)
-            return Up(ctx, id)
-        elseif !isdirectory(ctx.curdir .. ctx.files[ctx.idx])
-            prevdir = ctx.curdir
-            return Edit(id, 'e', ctx.curdir .. ctx.files[ctx.idx])
-        else
-            return Down(ctx, id)
+    if key ==# 'c'
+        var target = Selected(ctx, id)
+        if target !=# '' && isdirectory(ctx.curdir .. target)
+            execute 'cd' fnameescape(ctx.curdir .. target)
         endif
-    endif
-    if !empty(ctx.files)
-        if key ==# "\<right>" || key ==# "l"
-            if isdirectory(ctx.curdir .. ctx.files[ctx.idx])
-                return Down(ctx, id)
-            endif
-        endif
-
-        if key ==# "\<up>" || key ==# "k"
-            if ctx.idx > 0
-                ctx.idx -= 1
-            else
-                ctx.idx = len(ctx.files) - 1
-            endif
-        elseif key ==# "\<down>" || key ==# "j"
-            if ctx.idx < len(ctx.files) - 1
-                ctx.idx += 1
-            else
-                ctx.idx = 0
-            endif
-        endif
+        return true
     endif
 
     return popup_filter_menu(id, key)
 enddef
 
-def Edit(id: number, open: string, filepath: string): bool
-    popup_close(id)
-    execute open filepath
-    return 1
+def OnSelect(ctx: dict<any>, id: number, result: number): void
+    if result <= 0
+        return
+    endif
+    var name = ctx.files[result - 1]
+    if isdirectory(ctx.curdir .. name)
+        Descend(ctx, name)
+    else
+        prevdir = ctx.curdir
+        execute 'edit' fnameescape(ctx.curdir .. name)
+    endif
 enddef
 
 export def Open(curpath = ''): void
-
-    var ctx = {
-        'idx': 0,
-        'files': [],
-        'curdir': ''
-    }
-
     if curpath !=# ''
         prevdir = curpath
     endif
 
-    popup_min_width = (&columns / 2)
-    popup_max_height = (&lines / 2)
-
     var path = expand(prevdir)
-    var dir = fnamemodify(path, ':p:gs!\/!')
-    if isdirectory(dir) && dir !~# '/$'
-        dir ..= '/'
+    if !isdirectory(path)
+        path = fnamemodify(path, ':h')
     endif
-    ctx.curdir = dir
 
-    ctx.files = map(readdirex(path, '1', {'sort': 'collate'}), (_, v): string => Name(dir, v))
-    popup_menu(ctx.files, {
-        'filter': funcref('Filter', [ctx]),
-        'scrollbar': 0,
-        'minwidth': popup_min_width,
-        'maxheight': popup_max_height
-    })
-
+    var ctx: dict<any> = {
+        'files': [],
+        'curdir': fnamemodify(path, ':p')
+    }
+    Show(ctx)
 enddef

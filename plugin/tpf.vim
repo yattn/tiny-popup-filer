@@ -1,4 +1,7 @@
-if !has('vim9script') ||  v:version < 900
+if exists('g:loaded_tpf')
+    finish
+endif
+if !has('vim9script')
     echoerr 'Needs Vim version 9.0 and above'
     finish
 endif
@@ -6,5 +9,4 @@ vim9script
 
 g:loaded_tpf = true
 
-import autoload '../autoload/tpf.vim'
-command! -nargs=? -bar Tpf call tpf#Open(<f-args>)
+command! -nargs=? -complete=dir -bar Tpf call tpf#Open(<f-args>)
